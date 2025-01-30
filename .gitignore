@@ -1,2 +1,29 @@
-venv
 data
+# Virtual Environment
+venv/
+*.pyc
+__pycache__/
+db.sqlite3
+instance/
+
+# Django Secrets
+*.env
+config/settings_local.py
+
+# Migrations
+**/migrations/*.py
+!**/migrations/__init__.py
+
+# Model files
+*.pkl
+*.joblib
+models/
+
+# Logs & Debug Files
+logs/
+*.log
+
+# Pip & Python Dependencies
+*.egg-info/
+dist/
+build/
