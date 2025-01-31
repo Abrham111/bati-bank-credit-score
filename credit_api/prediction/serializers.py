@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from .models import Prediction
 
-class PredictionSerializer(serializers.ModelSerializer):
-  class Meta:
-    model = Prediction
-    fields = '__all__'
+class CreditworthinessSerializer(serializers.Serializer):
+  Recency = serializers.IntegerField()
+  Frequency = serializers.IntegerField()
+  Monetary = serializers.FloatField()
+  Stability = serializers.IntegerField()
+
