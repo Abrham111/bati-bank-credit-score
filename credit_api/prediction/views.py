@@ -1,32 +1,32 @@
-from django.shortcuts import render
-import joblib
-import numpy as np
-from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .models import Prediction
-from .serializers import PredictionSerializer
+from rest_framework.response import Response
+import joblib
 
-# Load models
-logreg = joblib.load("../models/logistic_regression.pkl")
-rf = joblib.load("../models/random_forest.pkl")
+# Load the trained model
+model = joblib.load("../models/logistic_regression.pkl")
 
-@api_view(['POST'])
+@api_view(["POST"])
 def predict_creditworthiness(request):
   try:
-    data = request.data  # Input JSON data
-    features = np.array([data["features"]]).astype(float)  # Convert to NumPy array
-    
-    # Choose model based on request
-    model_choice = data.get("model", "logreg")  # Default is logistic regression
-    model = logreg if model_choice == "logreg" else rf
-    
-    prediction = model.predict(features)[0]  # Get prediction (0 = bad, 1 = good)
-    
-    # Save prediction to database
-    prediction_entry = Prediction(input_data=data, prediction=prediction)
-    prediction_entry.save()
-    
-    return Response({"prediction": prediction, "model_used": model_choice})
-  
+    # Get JSON data from request
+    data = request.data 
+
+    # Extract input values (must match feature names used during training)
+    recency = data.get("Recency")
+    frequency = data.get("Frequency")
+    monetary = data.get("Monetary")
+    stability = data.get("Stability")
+
+    # Ensure all required fields are present
+    if None in [recency, frequency, monetary, stability]:
+      return Response({"error": "Missing required fields"}, status=400)
+
+    # Make prediction
+    prediction = model.predict([[recency, frequency, monetary, stability]])[0]
+    prediction_text = "Good" if prediction == 1 else "Bad"
+
+    # Return response
+    return Response({"creditworthiness": prediction_text})
+
   except Exception as e:
-    return Response({"error": str(e)}, status=400)
+    return Response({"error": str(e)}, status=500)
